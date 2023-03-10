@@ -40,7 +40,7 @@ const getAllPokemons  = async () => {
     const dataBasePokemons = await Pokemon.findAll();
     const response = await axios.get("https://pokeapi.co/api/v2/pokemon?limit=60");
     const pokemons = response.data.results;
-    const pokemonData = await Promise.all(pokemons.map(async (pokemon) => {
+    const pokemonApi = await Promise.all(pokemons.map(async (pokemon) => {
       const res = await axios.get(pokemon.url);
       return {
         id:res.data.id,
@@ -55,21 +55,26 @@ const getAllPokemons  = async () => {
         imagen: res.data.sprites.front_default
       };
     }));
-    return [...pokemonData,...dataBasePokemons];
+    return [...pokemonApi,...dataBasePokemons];
   } catch (error) {
     console.log(error);
   }
 }
 
-const getPokemonByName = async (name) => {
-  const pokemon = await Pokemon.findOne({
-    where: {
-      nombre: name,
-    },
-  });
-  return pokemon;
+const getPokemonByName = async (source, name) => {
+  const pokemon =
+  source === "api"
+    ? (await axios.get(`https://pokeapi.co/api/v2/pokemon/?search=${name}`)).data
+    : await Pokemon.findOne({
+        where: {  
+          nombre: name,
+          atributes: ['id', 'nombre', 'imagen', 'vida', 'ataque', 'defensa', 'velocidad', 'altura', 'peso']
+        },
+      })
+      return pokemon;
 };
 
+  
 
 
 module.exports = {
