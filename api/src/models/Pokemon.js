@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
       },
       imagen: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
       vida: {
         type: DataTypes.INTEGER,

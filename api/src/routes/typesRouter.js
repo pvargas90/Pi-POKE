@@ -1,9 +1,32 @@
-const { Router } = require("express");
+const { Router } = require('express');
+const router = Router();
+const { getTypes } = require('../controllers/typeController');
+const { Type } = require('../db');
 
-const typesRouter = Router();
+router.get('/', async (req, res) => {
+	try {
+ 
+		const typesFromDB = await Type.findAll();
+		console.log(typesFromDB)
+  
+		if (typesFromDB.length > 0) {
+		  const types = typesFromDB.map((type) => type.name);
+		  res.status(200).send(types);
+		}else {
+  
+		  const typesFromAPI = await getTypes();
+		  const types = await Promise.all(typesFromAPI.map(async (typeName) => {
+			const type = await Type.create({ name: typeName });
+			return type.name;
+		  }));
+		  res.status(200).send(types);
+		}
+	  } catch (error) {
+		console.error(error);
+		res.status(500).send('Internal server error');
+	  }
+});
 
-const getTypesHandler = require("../handlers/typesHandlers");
 
-typesRouter.get("/", getTypesHandler);
 
-module.exports = getTypesHandler;
+module.exports = router;
